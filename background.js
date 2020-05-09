@@ -29,22 +29,24 @@ chrome.pageAction.onClicked.addListener(function(tab) {
 
 chrome.runtime.onMessage.addListener(async function(message, sender, sendResponse) {
     const domain = new URL(sender.url).hostname;
+
     if (message.type == "loaded" && domain) { //TODO make this refer to the video loading
-        console.log(domain);
         const snapshot = (await db.ref("/scrapers/" + domain.replace(/\./g, ",") + "/css").once("value")).val();
-        console.log(snapshot);
         if (!snapshot) return;
         communicatingFrames.push({
             tabId: sender.tab.id,
             frameId: sender.frameId,
             selector: snapshot,
         });
+        console.log("Enabling");
         chrome.pageAction.show(sender.tab.id);
     }
 });
 
 window.setForDomain = function(domain, selector) {
-    firebase.database().ref('scrapers/' + sanitize(domain)).set({
+    sanDomain=domain.replace(/\./g,",");
+    console.log(sanDomain);
+    db.ref('/scrapers/' + sanDomain).set({
         css:selector
     });
 }
