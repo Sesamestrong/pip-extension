@@ -17,6 +17,7 @@ const db = firebase.database();
 let communicatingFrames = [];
 
 chrome.pageAction.onClicked.addListener(function(tab) {
+    console.log("Going!");
     const framesToDo = communicatingFrames.filter(frameInfo => frameInfo.tabId == tab.id);
     framesToDo.forEach(frameToDo => (chrome.tabs.sendMessage(tab.id, {
         type: 'toggle',
