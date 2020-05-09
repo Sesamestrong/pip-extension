@@ -18,13 +18,13 @@ let communicatingFrames = [];
 
 chrome.pageAction.onClicked.addListener(function(tab) {
     const framesToDo = communicatingFrames.filter(frameInfo => frameInfo.tabId == tab.id);
-    console.log("Clicked");
     framesToDo.forEach(frameToDo => chrome.tabs.sendMessage(tab.id, {
         type: 'toggle',
         selector: frameToDo.selector
     }, {
         frameId: frameToDo.frameId
     }));
+    chrome.pageAction.show(sender.tab.id);
 });
 
 chrome.runtime.onMessage.addListener(async function(message, sender, sendResponse) {
