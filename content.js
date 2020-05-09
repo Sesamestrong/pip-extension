@@ -1,11 +1,18 @@
-console.log("Content script baby");
-chrome.runtime.sendMessage({type:"loaded"},
-    function(response) {
-        console.log("They responded?");
-    }
-);
+chrome.runtime.sendMessage({type:"loaded"});
+let videoEl;
 
-chrome.runtime.onMessage.addListener(function(){
-    console.log("Running the request of PiP");
-    document.getElementById("content-video-player").requestPictureInPicture();
+chrome.runtime.onMessage.addListener(function({type,selector}){
+    const el=document.querySelector(selector);
+    if(el){
+        if(el.requestPictureInPicture)
+            el.requestPictureInPicture();
+        else if(el.captureStream){
+            videoEl=videoEl||document.createElement("video");
+            const srcObject=el.captureStream(30);
+            videoEl.srcObject=srcObject;
+            videoEl.play();
+            videoEl.requestPictureInPicture();
+        }
+        
+    }
 });
