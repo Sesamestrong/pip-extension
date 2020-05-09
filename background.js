@@ -18,13 +18,12 @@ let communicatingFrames = [];
 
 chrome.pageAction.onClicked.addListener(function(tab) {
     const framesToDo = communicatingFrames.filter(frameInfo => frameInfo.tabId == tab.id);
-    framesToDo.forEach(frameToDo => chrome.tabs.sendMessage(tab.id, {
+    framesToDo.forEach(frameToDo => (chrome.tabs.sendMessage(tab.id, {
         type: 'toggle',
         selector: frameToDo.selector
     }, {
         frameId: frameToDo.frameId
-    }));
-    chrome.pageAction.show(sender.tab.id);
+    })));
 });
 
 chrome.runtime.onMessage.addListener(async function(message, sender, sendResponse) {
@@ -32,21 +31,32 @@ chrome.runtime.onMessage.addListener(async function(message, sender, sendRespons
 
     if (message.type == "loaded" && domain) { //TODO make this refer to the video loading
         const snapshot = (await db.ref("/scrapers/" + domain.replace(/\./g, ",") + "/css").once("value")).val();
-        if (!snapshot) return;
+        if(!snapshot) return;
         communicatingFrames.push({
             tabId: sender.tab.id,
             frameId: sender.frameId,
             selector: snapshot,
         });
-        console.log("Enabling");
-        chrome.pageAction.show(sender.tab.id);
+        console.log("Enabling",domain);
+        setOnSite(sender.tab.id, true);
     }
 });
 
+function setOnSite(tabId, isOn) {
+    chrome.pageAction.setIcon({
+        tabId,
+        path: "images/" + (isOn ? "enabled" : "disabled") + "32.png"
+    });
+    chrome.pageAction.setPopup({
+        tabId,
+        popup: isOn ? "" : "popup.html"
+    });
+    chrome.pageAction[isOn ? "show" : "hide"](tabId);
+}
+
 window.setForDomain = function(domain, selector) {
-    sanDomain=domain.replace(/\./g,",");
-    console.log(sanDomain);
+    sanDomain = domain.replace(/\./g, ",");
     db.ref('/scrapers/' + sanDomain).set({
-        css:selector
+        css: selector
     });
 }
