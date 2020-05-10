@@ -17,7 +17,7 @@ chrome.runtime.onMessage.addListener(async function({
             hasSound:el.muted===false,
             isDefinitelyPlaying:!el.paused,
         });
-    } else if (type=="runEl") {
+    } else if (type=="runEl"&&chosenEl) {
         const el=chosenEl;
         if (el.requestPictureInPicture)
             el.requestPictureInPicture();

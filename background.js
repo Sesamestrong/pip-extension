@@ -16,6 +16,7 @@ const db = firebase.database();
 
 let communicatingFrames = [];
 
+
 chrome.pageAction.onClicked.addListener(async function(tab) {
     const framesToDo = communicatingFrames.filter(frameInfo => frameInfo.tabId == tab.id);
     const els = (await Promise.all(framesToDo.map(frameToDo => new Promise((resolve, reject) => (chrome.tabs.sendMessage(tab.id, {
@@ -32,11 +33,15 @@ chrome.pageAction.onClicked.addListener(async function(tab) {
         hasSound,
         isDefinitelyPlaying,
         frameId: frameToDo.frameId
-    }))))))).filter(el=>el);
+    }))))))).filter(el => el);
     const el = (els.length ? (els.length == 1 ? els[0] : ((els => els.length == 1 ? els : els.filter(el => el.hasSound))(els.filter(el => el.isDefinitelyPlaying))[0] || els[0])) : null)
     chrome.tabs.sendMessage(tab.id, {
         type: 'runEl'
     });
+});
+
+chrome.tabs.onUpdated.addListener(function(tabId) {
+    chrome.pageAction.show(tabId);
 });
 
 chrome.runtime.onMessage.addListener(async function(message, sender, sendResponse) {
@@ -55,6 +60,7 @@ chrome.runtime.onMessage.addListener(async function(message, sender, sendRespons
     }
 });
 
+
 function setOnSite(tabId, isOn) {
     chrome.pageAction.setIcon({
         tabId,
@@ -64,7 +70,6 @@ function setOnSite(tabId, isOn) {
         tabId,
         popup: isOn ? "" : "popup.html"
     });
-    chrome.pageAction[isOn ? "show" : "hide"](tabId);
 }
 
 window.setForDomain = function(domain, selector) {
