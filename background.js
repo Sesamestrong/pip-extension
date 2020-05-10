@@ -26,15 +26,17 @@ chrome.pageAction.onClicked.addListener(async function(tab) {
         frameId: frameToDo.frameId
     }, ({
         type,
-        hasSound,
-        isDefinitelyPlaying
-    }) => resolve({
+        muted,
+        paused,
+        requestPictureInPicture
+    }={}) => resolve({
         type,
-        hasSound,
-        isDefinitelyPlaying,
+        muted,
+        paused,
+        requestPictureInPicture,
         frameId: frameToDo.frameId
-    }))))))).filter(el => el);
-    const el = (els.length ? (els.length == 1 ? els[0] : ((els => els.length == 1 ? els : els.filter(el => el.hasSound))(els.filter(el => el.isDefinitelyPlaying))[0] || els[0])) : null)
+    }))))))).filter(el => el.type);
+    const el = runConstraints(mediaElementRules,els);
     chrome.tabs.sendMessage(tab.id, {
         type: 'runEl'
     });

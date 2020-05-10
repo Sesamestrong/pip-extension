@@ -10,15 +10,17 @@ chrome.runtime.onMessage.addListener(async function({
 }, sender, reply) {
     if (type == "findEls") {
         const els = [...document.querySelectorAll(selector)];
-        const el = (els.length ? (els.length == 1 ? els[0] : ((els => els.length == 1 ? els : els.filter(el => el.muted===false))(els.filter(el => !el.paused))[0] || els[0])) : null);
+        const el = runConstraints(mediaElementRules, els);
+        if (!el) return reply();
         chosenEl = el;
         reply({
             type: "el",
-            hasSound:el.muted===false,
-            isDefinitelyPlaying:!el.paused,
+            muted: el.muted,
+            paused: el.paused,
+            requestPictureInPicture:!!el.requestPictureInPicture,
         });
-    } else if (type=="runEl"&&chosenEl) {
-        const el=chosenEl;
+    } else if (type == "runEl" && chosenEl) {
+        const el = chosenEl;
         if (el.requestPictureInPicture)
             el.requestPictureInPicture();
         else if (el.captureStream) {

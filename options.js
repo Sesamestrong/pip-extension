@@ -8,4 +8,4 @@ chrome.tabs.query({
 }, ([tab]) => {
     domainInput.value = new URL(tab.url).hostname
 });
-submit.addEventListener("click", () => (bkg.setForDomain(domainInput.value, selectorInput.value), alert("Set up")));
+submit.addEventListener("click", () => (bkg.setForDomain(domainInput.value, selectorInput.value), domainInput.value = ""));
