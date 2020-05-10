@@ -16,15 +16,27 @@ const db = firebase.database();
 
 let communicatingFrames = [];
 
-chrome.pageAction.onClicked.addListener(function(tab) {
-    console.log("Going!");
+chrome.pageAction.onClicked.addListener(async function(tab) {
     const framesToDo = communicatingFrames.filter(frameInfo => frameInfo.tabId == tab.id);
-    framesToDo.forEach(frameToDo => (chrome.tabs.sendMessage(tab.id, {
-        type: 'toggle',
+    const els = (await Promise.all(framesToDo.map(frameToDo => new Promise((resolve, reject) => (chrome.tabs.sendMessage(tab.id, {
+        type: 'findEls',
         selector: frameToDo.selector
     }, {
         frameId: frameToDo.frameId
-    })));
+    }, ({
+        type,
+        hasSound,
+        isDefinitelyPlaying
+    }) => resolve({
+        type,
+        hasSound,
+        isDefinitelyPlaying,
+        frameId: frameToDo.frameId
+    }))))))).filter(el=>el);
+    const el = (els.length ? (els.length == 1 ? els[0] : ((els => els.length == 1 ? els : els.filter(el => el.hasSound))(els.filter(el => el.isDefinitelyPlaying))[0] || els[0])) : null)
+    chrome.tabs.sendMessage(tab.id, {
+        type: 'runEl'
+    });
 });
 
 chrome.runtime.onMessage.addListener(async function(message, sender, sendResponse) {
@@ -32,13 +44,13 @@ chrome.runtime.onMessage.addListener(async function(message, sender, sendRespons
 
     if (message.type == "loaded" && domain) { //TODO make this refer to the video loading
         const snapshot = (await db.ref("/scrapers/" + domain.replace(/\./g, ",") + "/css").once("value")).val();
-        if(!snapshot) return;
+        if (!snapshot) return;
         communicatingFrames.push({
             tabId: sender.tab.id,
             frameId: sender.frameId,
             selector: snapshot,
         });
-        console.log("Enabling",domain);
+        console.log("Enabling", domain);
         setOnSite(sender.tab.id, true);
     }
 });
