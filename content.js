@@ -11,7 +11,7 @@ chrome.runtime.onMessage.addListener(async function({
     if (type == "findEls") {
         const els = [...document.querySelectorAll(selector)];
         const el = runConstraints(mediaElementRules, els);
-        if (!el) return reply();
+        if (!el) return reply({});
         chosenEl = el;
         reply({
             type: "el",

@@ -30,6 +30,6 @@
             "128": "images/disabled128.png"
         },
         "default_title":"Picture in Picture",
-        "default_popup":"popup.html"
+        "default_popup":"options.html"
     }
 }

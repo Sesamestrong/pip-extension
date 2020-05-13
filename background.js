@@ -70,7 +70,7 @@ function setOnSite(tabId, isOn) {
     });
     chrome.pageAction.setPopup({
         tabId,
-        popup: isOn ? "" : "popup.html"
+        popup: isOn ? "" : "options.html"
     });
 }
 
